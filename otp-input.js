@@ -8,6 +8,7 @@
         let $this = $(this);
 
         $this.addClass("otp-input");
+        $this.html("");
 
         if ($config !== undefined) {
             $config.count = $config.count !== undefined ? $config.count : 6;
