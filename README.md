@@ -1,4 +1,4 @@
-# OTP Input
+# OTP Input v1.0.1
 
 Copyright (c) 2022-2023 Ahmet Kaplan Licensed under the MIT license (<https://opensource.org/licenses/MIT>)
 

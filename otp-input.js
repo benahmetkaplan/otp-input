@@ -1,8 +1,7 @@
 /*!
-* otp-input v1.0
+* otp-input v1.0.1
 * Released under the MIT License.
 */
-
 (function($) {
     "use strict";
     $.fn.otpInput = function($config) {
@@ -13,14 +12,16 @@
         if ($config !== undefined) {
             $config.count = $config.count !== undefined ? $config.count : 6;
             $config.isNumber = $config.isNumber !== undefined ? $config.isNumber : false;
-            $config.name = $config.name !== undefined ? $config.name : 'otp';
+            $config.defaultStyle = $config.defaultStyle !== undefined ? $config.defaultStyle : true;
+            $config.inputWarning = $config.inputWarning !== undefined ? $config.inputWarning : true;
+            $config.name = $config.name !== undefined ? $config.name : 'otpCode';
         }else{
             $config.count = 6;
             $config.isNumber = false;
-            $config.name = 'otp';
+            $config.defaultStyle = true;
+            $config.inputWarning = true;
+            $config.name = 'otpCode';
         }
-
-        let parentWidth = (50 * $config.count) - 10;
 
         for (let i = 0; i < $config.count; i++) {
             $this.append(`<input id="otpInput${i}" ${ i >= 0 && i < $config.count - 1 ? "data-next='otpInput" + (i+1) + "'" : "" } ${ i <= $config.count && i > 0 ? "data-previous='otpInput" + (i-1) + "'" : "" } type="${$config.isNumber ? "number":"text"}">`);
@@ -30,38 +31,47 @@
 
         $this.find('input:not([type="hidden"])').each(function() {
             $(this).on('keyup', function(e) {
-                let key = e.keyCode;
-                let keyStatu = true;
+                let $keyCode = e.keyCode;
+                let $keyStatu = true;
 
                 if ($config.isNumber) {
-                    keyStatu = (key == 8 || key == 9 || key == 13 || key == 46 || key == 110 || key == 190 || (key >= 35 && key <= 40) || (key >= 48 && key <= 57) || (key >= 96 && key <= 105));
+                    $keyStatu = ($keyCode == 8 || $keyCode == 9 || $keyCode == 13 || $keyCode == 46 || $keyCode == 110 || $keyCode == 190 || ($keyCode >= 35 && $keyCode <= 40) || ($keyCode >= 48 && $keyCode <= 57) || ($keyCode >= 96 && $keyCode <= 105));
                 }
 
-                if (keyStatu) {
-                    if(key === 8 || key === 37) {
-                        var prev = $this.find('input#' + $(this).data('previous'));                        
-                        if(prev.length) {
-                            $(prev).select();
+                if ($keyStatu) {
+                    if($keyCode === 8 || $keyCode === 37) {
+                        let $prev = $this.find('input#' + $(this).data('previous'));                        
+                        if($prev.length) {
+                            $($prev).select();
                         }
-                    } else if((key >= 48 && key <= 57) || (key >= 65 && key <= 90) || (key >= 96 && key <= 105) || key === 39) {
-                        var next = $this.find('input#' + $(this).data('next'));
-                        if(next.length) {
-                            $(next).select();
+                    } else if(($keyCode >= 48 && $keyCode <= 57) || ($keyCode >= 65 && $keyCode <= 90) || ($keyCode >= 96 && $keyCode <= 105) || $keyCode === 39) {
+                        let $next = $this.find('input#' + $(this).data('next'));
+                        if($next.length) {
+                            $($next).select();
                         } else {
-                            let val = "";
-                            let completeStatu = false;
+                            let $otpValue = "";
+                            let $isComplete = false;
                             $.when($this.find('input:not([type="hidden"])').each(function(){
-                                val += $(this).val();
+                                if ($(this).val() !== "") {
+                                    $otpValue += $(this).val();
+                                    if ($config.inputWarning) {
+                                        $(this).css("border-color", "#009432");
+                                    }
+                                }else{
+                                    if ($config.inputWarning) {
+                                        $(this).css("border-color", "red");
+                                    }
+                                }
                             })).then(function(){
-                                $this.find('input[type="hidden"]').val(val);
-                                completeStatu = val.length === $config.count;
-                                if (completeStatu) {
+                                $this.find('input[type="hidden"]').val($otpValue);
+                                $isComplete = $otpValue.length === $config.count;
+                                if ($isComplete) {
                                     $this.addClass("success");
                                 }else{
                                     $this.addClass("error");
                                 }
                                 if ($config.complete !== undefined) {
-                                    $config.complete(val, completeStatu);
+                                    $config.complete($otpValue, $isComplete);
                                 }
                             });
                         }
@@ -71,12 +81,15 @@
             });
             $(this).on('input', function(e) {
                 if ($(this).val().length > 1) {
-                    $(this).val($(this).val().slice(0,1));
+                    $(this).val($(this).val().substr($(this).val().length - 1));
                 }
             });
         });
 
-        $("head").append(`<style>.otp-input{display:flex;align-items:center;justify-content:center;max-width:${parentWidth}px;margin:auto}.otp-input input{width:100%;height:40px;border:2px solid transparent;outline:0;box-shadow:none;text-align:center;padding:0 5px;color:#000;background:#e1e1e1;border-radius:5px;font-size:16px;font-weight:600}.otp-input input+input{margin-left:10px}.otp-input input:focus,.otp-input input:hover{border-color:#000}.otp-input input::-webkit-inner-spin-button,.otp-input input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.otp-input input[type=number]{-moz-appearance:textfield}.otp-input.error input { border-color: red; } .otp-input.success input { border-color: #009432; }</style>`);
+        if ($config.defaultStyle) {
+            let $parentWidth = (50 * $config.count) - 10;
+            $("head").append(`<style>.otp-input { max-width:${$parentWidth}px; display: flex; align-items: center; justify-content: center; margin: auto; } .otp-input input { width: 100%; height: 40px; border: 2px solid transparent; outline: 0; box-shadow: none; text-align: center; padding: 0 5px; color: #000; background: #e1e1e1; border-radius: 5px; font-size: 16px; font-weight: 600; transition: all .1s ease-in-out; } .otp-input input+input { margin-left: 10px; } .otp-input input:focus { transform: scale(1.3); } .otp-input input::-webkit-inner-spin-button,.otp-input input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; } .otp-input input[type=number] { -moz-appearance: textfield; }</style>`);
+        }
 
     }
 })(jQuery);
