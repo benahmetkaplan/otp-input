@@ -31,7 +31,7 @@
         $this.append(`<input name="${$config.name}" id="${$config.name}" type="hidden">`);
 
         $this.find('input:not([type="hidden"])').each(function() {
-            $(this).on('keyup', function(e) {
+            $(this).on('keydown', function(e) {
                 let $keyCode = e.keyCode;
                 let $keyStatu = true;
 
@@ -43,12 +43,16 @@
                     if($keyCode === 8 || $keyCode === 37) {
                         let $prev = $this.find('input#' + $(this).data('previous'));                        
                         if($prev.length) {
-                            $($prev).select();
+                            setTimeout(function(){
+                                $($prev).select();
+                            }, 100);
                         }
                     } else if(($keyCode >= 48 && $keyCode <= 57) || ($keyCode >= 65 && $keyCode <= 90) || ($keyCode >= 96 && $keyCode <= 105) || $keyCode === 39) {
                         let $next = $this.find('input#' + $(this).data('next'));
                         if($next.length) {
-                            $($next).select();
+                            setTimeout(function(){
+                                $($next).select();
+                            }, 100);
                         } else {
                             let $otpValue = "";
                             let $isComplete = false;
