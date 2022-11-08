@@ -56,29 +56,31 @@
                         } else {
                             let $otpValue = "";
                             let $isComplete = false;
-                            $.when($this.find('input:not([type="hidden"])').each(function(){
-                                if ($(this).val() !== "") {
-                                    $otpValue += $(this).val();
-                                    if ($config.inputWarning) {
-                                        $(this).css("border-color", "#009432");
+                            setTimeout(function(){
+                                $.when($this.find('input:not([type="hidden"])').each(function(){
+                                    if ($(this).val() !== "") {
+                                        $otpValue += $(this).val();
+                                        if ($config.inputWarning) {
+                                            $(this).css("border-color", "#009432");
+                                        }
+                                    }else{
+                                        if ($config.inputWarning) {
+                                            $(this).css("border-color", "red");
+                                        }
                                     }
-                                }else{
-                                    if ($config.inputWarning) {
-                                        $(this).css("border-color", "red");
+                                })).then(function(){
+                                    $this.find('input[type="hidden"]').val($otpValue);
+                                    $isComplete = $otpValue.length === $config.count;
+                                    if ($isComplete) {
+                                        $this.addClass("success");
+                                    }else{
+                                        $this.addClass("error");
                                     }
-                                }
-                            })).then(function(){
-                                $this.find('input[type="hidden"]').val($otpValue);
-                                $isComplete = $otpValue.length === $config.count;
-                                if ($isComplete) {
-                                    $this.addClass("success");
-                                }else{
-                                    $this.addClass("error");
-                                }
-                                if ($config.complete !== undefined) {
-                                    $config.complete($otpValue, $isComplete);
-                                }
-                            });
+                                    if ($config.complete !== undefined) {
+                                        $config.complete($otpValue, $isComplete);
+                                    }
+                                });
+                            }, 100);
                         }
                     }
                 }
